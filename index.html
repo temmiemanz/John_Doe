@@ -1085,46 +1085,64 @@ function save() {
   try { localStorage.setItem(SAVE_KEY, JSON.stringify(data)); } catch(e) {}
 }
 
+// ── JOHN DOE BASE STATS — edit here to change defaults ──
+const JD_DEFAULTS = {
+  name:        'John Doe',
+  player:      'Nik',
+  str:         11,
+  mnd:         15,
+  sol:         13,
+  def:         10,
+  hp:          8,
+  hpMax:       8,
+  level:       1,
+  powerCat:    'Conjuration',
+  powerType:   'EGG',
+  abilityName: 'Perspective',
+};
+
 function load() {
   let data;
   try { data = JSON.parse(localStorage.getItem(SAVE_KEY)); } catch(e) {}
-  if (!data) { ['str','mnd','sol','def'].forEach(s => updateStat(s)); return; }
 
   const set = (id, val) => { const el = document.getElementById(id); if (el && val !== undefined && val !== null) el.value = val; };
-  set('charName',    data.charName);
-  set('playerName',  data.playerName);
-  set('abilityName', data.abilityName);
-  set('currentHp',   data.currentHp);
-  set('maxHp',       data.maxHp);
-  set('levelVal',    data.level);
-  set('acVal',       data.ac);
-  set('strVal',      data.str ?? 11);
-  set('mndVal',      data.mnd ?? 15);
-  set('solVal',      data.sol ?? 13);
-  set('defVal',      data.def ?? 10);
-  set('conditionsText', data.conditions);
 
-  if (data.powerCat) {
-    const el = document.getElementById('powerCat');
-    [...el.options].forEach(o => { if (o.value === data.powerCat) o.selected = true; });
-  }
-  if (data.powerType) {
-    const el = document.getElementById('powerType');
-    [...el.options].forEach(o => { if (o.value === data.powerType) o.selected = true; });
-  }
+  // Always apply locked base stats from JD_DEFAULTS — never from stale saves
+  set('charName',    JD_DEFAULTS.name);
+  set('playerName',  JD_DEFAULTS.player);
+  set('strVal',      JD_DEFAULTS.str);
+  set('mndVal',      JD_DEFAULTS.mnd);
+  set('solVal',      JD_DEFAULTS.sol);
+  set('defVal',      JD_DEFAULTS.def);
+  set('levelVal',    JD_DEFAULTS.level);
+  set('abilityName', JD_DEFAULTS.abilityName);
 
-  if (data.profs) {
+  // Power dropdowns
+  const cat = document.getElementById('powerCat');
+  const typ = document.getElementById('powerType');
+  if (cat) [...cat.options].forEach(o => { o.selected = o.value === JD_DEFAULTS.powerCat; });
+  if (typ) [...typ.options].forEach(o => { o.selected = o.value === JD_DEFAULTS.powerType; });
+
+  // HP — use saved if exists, else default
+  set('currentHp', data?.currentHp ?? JD_DEFAULTS.hp);
+  set('maxHp',     data?.hpMax     ?? JD_DEFAULTS.hpMax);
+  set('acVal',     data?.ac);
+
+  // Player-controlled fields — only restore from save
+  set('conditionsText', data?.conditions);
+
+  if (data?.profs) {
     Object.entries(data.profs).forEach(([sk, val]) => {
       const el = document.getElementById(sk + '-prof');
       if (el) el.value = val;
     });
   }
 
-  if (data.items && data.items.length) {
+  if (data?.items && data.items.length) {
     data.items.forEach(item => addItem(item.name, item.qty));
   }
 
-  if (data.initBonus !== undefined) {
+  if (data?.initBonus !== undefined) {
     initBonus = data.initBonus;
     updateInitDisplay();
   }
@@ -1137,40 +1155,6 @@ function load() {
   updateACDisplay();
   updateInitDisplay();
   refreshZeroHidden();
-
-  // ── John Doe defaults (edit these to change base stats) ──
-  if (!data) {
-    const JD = {
-      name:        'John Doe',
-      player:      'Nik',
-      str:         11,
-      mnd:         15,
-      sol:         13,
-      def:         10,
-      hp:          8,
-      hpMax:       8,
-      level:       1,
-      powerCat:    'Conjuration',
-      powerType:   'EGG',
-      abilityName: 'Perspective',
-    };
-    set('charName',    JD.name);
-    set('playerName',  JD.player);
-    set('strVal',      JD.str);
-    set('mndVal',      JD.mnd);
-    set('solVal',      JD.sol);
-    set('defVal',      JD.def);
-    set('currentHp',   JD.hp);
-    set('maxHp',       JD.hpMax);
-    set('levelVal',    JD.level);
-    set('abilityName', JD.abilityName);
-    const cat = document.getElementById('powerCat');
-    const typ = document.getElementById('powerType');
-    if (cat) [...cat.options].forEach(o => { if (o.value===JD.powerCat)  o.selected=true; });
-    if (typ) [...typ.options].forEach(o => { if (o.value===JD.powerType) o.selected=true; });
-    ['str','mnd','sol','def'].forEach(s => updateStat(s));
-    updateACDisplay(); updateInitDisplay(); refreshZeroHidden();
-  }
 }
 
 // ══════════════════════════════════════════
