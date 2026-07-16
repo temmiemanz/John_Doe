@@ -842,42 +842,36 @@ body {
 .action-rm:hover { color: var(--red); }
 .action-name-text { font-family: var(--font-main); }
 .action-notes-text { font-family: var(--font-main); }
-/* ══════════════════════════════════════════
-   DEATH SAVES
-   ══════════════════════════════════════════ */
-.death-saves {
-  display: none; /* shown only when HP = 0 */
-  flex-direction: column; gap: 6px;
-  padding: 10px 14px; margin-top: 4px;
-  border: 1px solid var(--red); border-radius: var(--radius-lg);
+
+/* DEATH SAVES */
+#deathSaves {
+  display: none;
+  flex-direction: column; gap: 8px;
+  padding: 10px 14px; margin-top: 6px;
+  border: 1px solid var(--red);
+  border-radius: var(--radius-lg);
   background: rgba(168,50,50,0.08);
 }
-.death-saves.visible { display: flex; }
-.death-saves-title {
-  font-size: 9px; font-weight: 700; text-transform: uppercase;
-  letter-spacing: 0.14em; color: var(--red);
-}
-.death-saves-row { display: flex; align-items: center; gap: 8px; }
-.death-saves-label {
-  font-size: 10px; color: var(--muted); width: 52px;
-  text-transform: uppercase; letter-spacing: 0.08em;
-}
-.death-pips { display: flex; gap: 5px; }
-.death-pip {
+#deathSaves.on { display: flex; }
+.ds-title { font-size: 9px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.14em; color: var(--red); }
+.ds-row { display: flex; align-items: center; gap: 8px; }
+.ds-label { font-size: 10px; color: var(--muted); width: 64px; text-transform: uppercase; letter-spacing: 0.08em; }
+.ds-pips { display: flex; gap: 5px; }
+.ds-pip {
   width: 14px; height: 14px; border-radius: 50%;
-  border: 1px solid var(--border2); background: none;
-  cursor: pointer; transition: all var(--transition);
+  border: 1px solid var(--border2); cursor: pointer;
+  transition: all 0.1s;
 }
-.death-pip.success.filled { background: var(--green); border-color: var(--green); }
-.death-pip.fail.filled    { background: var(--red);   border-color: var(--red); }
-.death-pip:hover { border-color: var(--accent); }
-.death-roll-btn {
+.ds-pip:hover { border-color: var(--accent); }
+.ds-pip.s.on { background: var(--green); border-color: var(--green); }
+.ds-pip.f.on { background: var(--red);   border-color: var(--red); }
+.ds-roll {
   margin-left: auto; font-size: 9px; font-weight: 700; letter-spacing: 0.08em;
   text-transform: uppercase; padding: 3px 10px;
   border: 1px solid var(--red); background: none; color: var(--red);
-  border-radius: 99px; cursor: pointer; transition: all var(--transition);
+  border-radius: 99px; cursor: pointer; transition: all 0.1s;
 }
-.death-roll-btn:hover { background: var(--red); color: var(--btn-text); }
+.ds-roll:hover { background: var(--red); color: #fff; }
 </style>
 </head>
 <body>
@@ -1140,25 +1134,26 @@ body {
   </div>
 
 
+
   <!-- DEATH SAVES -->
-  <div class="death-saves" id="deathSaves">
-    <div class="death-saves-title">Death Saves</div>
-    <div class="death-saves-row">
-      <span class="death-saves-label">Successes</span>
-      <div class="death-pips">
-        <div class="death-pip success" data-type="success" data-idx="0" onclick="toggleDeathPip(this)"></div>
-        <div class="death-pip success" data-type="success" data-idx="1" onclick="toggleDeathPip(this)"></div>
-        <div class="death-pip success" data-type="success" data-idx="2" onclick="toggleDeathPip(this)"></div>
+  <div id="deathSaves">
+    <div class="ds-title">⚠ Death Saves</div>
+    <div class="ds-row">
+      <span class="ds-label">Successes</span>
+      <div class="ds-pips">
+        <div class="ds-pip s" id="ds-s-0" onclick="dsPip(this)"></div>
+        <div class="ds-pip s" id="ds-s-1" onclick="dsPip(this)"></div>
+        <div class="ds-pip s" id="ds-s-2" onclick="dsPip(this)"></div>
       </div>
     </div>
-    <div class="death-saves-row">
-      <span class="death-saves-label">Failures</span>
-      <div class="death-pips">
-        <div class="death-pip fail" data-type="fail" data-idx="0" onclick="toggleDeathPip(this)"></div>
-        <div class="death-pip fail" data-type="fail" data-idx="1" onclick="toggleDeathPip(this)"></div>
-        <div class="death-pip fail" data-type="fail" data-idx="2" onclick="toggleDeathPip(this)"></div>
+    <div class="ds-row">
+      <span class="ds-label">Failures</span>
+      <div class="ds-pips">
+        <div class="ds-pip f" id="ds-f-0" onclick="dsPip(this)"></div>
+        <div class="ds-pip f" id="ds-f-1" onclick="dsPip(this)"></div>
+        <div class="ds-pip f" id="ds-f-2" onclick="dsPip(this)"></div>
       </div>
-      <button class="death-roll-btn" onclick="rollDeathSave()">Roll</button>
+      <button class="ds-roll" onclick="dsRoll()">Roll Save</button>
     </div>
   </div>
 
@@ -1601,7 +1596,6 @@ function adjustHp(dir) {
   clearTimeout(flashTimer);
   flashTimer = setTimeout(() => { fl.textContent = ''; fl.className = 'hp-flash'; }, 1500);
   save();
-  checkDeathSaves();
 }
 
 function clampHp() {
@@ -1993,79 +1987,79 @@ function loadActions() {
   data.forEach(d => addAction(d));
 }
 
-// ══════════════════════════════════════════
-// DEATH SAVES
-// ══════════════════════════════════════════
-function checkDeathSaves() {
-  const el  = document.getElementById('currentHp');
-  const box = document.getElementById('deathSaves');
-  if (!box || !el) return;
-  const raw = el.value.trim();
-  // Show death saves only when HP is explicitly the number 0
-  const show = raw !== '' && raw !== '—' && parseInt(raw) === 0;
-  box.classList.toggle('visible', show);
+// ── DEATH SAVES ──
+// Poll HP every 500ms — simplest possible approach
+setInterval(function() {
+  var hp  = document.getElementById('currentHp').value;
+  var box = document.getElementById('deathSaves');
+  if (!box) return;
+  // Show if hp is the string "0"
+  if (hp === '0') {
+    box.classList.add('on');
+  } else {
+    box.classList.remove('on');
+  }
+}, 500);
+
+function dsPip(el) {
+  el.classList.toggle('on');
+  dsSave();
+  dsCheck();
 }
 
-function toggleDeathPip(pip) {
-  pip.classList.toggle('filled');
-  saveDeathSaves();
-  checkDeathOutcome();
-}
-
-function checkDeathOutcome() {
-  const successes = document.querySelectorAll('.death-pip.success.filled').length;
-  const failures  = document.querySelectorAll('.death-pip.fail.filled').length;
-  if (successes >= 3) showToast(20, 20, 'Stabilized!');
-  if (failures  >= 3) showToast(1,  1,  'You have died.');
-}
-
-function rollDeathSave() {
-  const d20   = rollD20();
-  const nat20 = d20 === 20;
-  const nat1  = d20 === 1;
-  const success = d20 >= 10;
-  if (nat20) {
-    const cur = document.getElementById('currentHp');
-    cur.value = 1; checkDeathSaves(); clearDeathSaves(); save();
+function dsRoll() {
+  var d = rollD20();
+  if (d === 20) {
+    document.getElementById('currentHp').value = 1;
+    dsClear();
     showToast(20, 20, 'Nat 20 — Back on your feet!');
     return;
   }
-  if (nat1)        { fillNextPips('fail', 2);    showToast(d20, d20, 'Nat 1 — Two failures!'); }
-  else if (success){ fillNextPips('success', 1); showToast(d20, d20, 'Death save — Success'); }
-  else             { fillNextPips('fail', 1);    showToast(d20, d20, 'Death save — Failure'); }
-  saveDeathSaves();
-  checkDeathOutcome();
+  if (d === 1)  { dsFill('f', 2); showToast(1,  d, 'Nat 1 — Two failures!');   }
+  else if (d >= 10) { dsFill('s', 1); showToast(d, d, 'Death Save — Success'); }
+  else          { dsFill('f', 1); showToast(d, d, 'Death Save — Failure');  }
+  dsSave();
+  dsCheck();
 }
 
-function fillNextPips(type, count) {
-  const pips = document.querySelectorAll(`.death-pip.${type}:not(.filled)`);
-  for (let i = 0; i < Math.min(count, pips.length); i++) pips[i].classList.add('filled');
+function dsFill(type, count) {
+  var pips = document.querySelectorAll('.ds-pip.' + type + ':not(.on)');
+  for (var i = 0; i < Math.min(count, pips.length); i++) pips[i].classList.add('on');
 }
 
-function clearDeathSaves() {
-  document.querySelectorAll('.death-pip').forEach(p => p.classList.remove('filled'));
-  saveDeathSaves();
+function dsClear() {
+  document.querySelectorAll('.ds-pip').forEach(function(p) { p.classList.remove('on'); });
+  dsSave();
 }
 
-function saveDeathSaves() {
-  const s = [...document.querySelectorAll('.death-pip.success')].map(p => p.classList.contains('filled'));
-  const f = [...document.querySelectorAll('.death-pip.fail')].map(p => p.classList.contains('filled'));
-  try { localStorage.setItem(SAVE_KEY + '_death', JSON.stringify({s, f})); } catch(e) {}
+function dsCheck() {
+  var s = document.querySelectorAll('.ds-pip.s.on').length;
+  var f = document.querySelectorAll('.ds-pip.f.on').length;
+  if (s >= 3) showToast(20, 20, 'Stabilized!');
+  if (f >= 3) showToast(1,  1,  'You have died.');
 }
 
-function loadDeathSaves() {
-  let data;
-  try { data = JSON.parse(localStorage.getItem(SAVE_KEY + '_death')); } catch(e) {}
+function dsSave() {
+  var s = [0,1,2].map(function(i){ return document.getElementById('ds-s-'+i)?.classList.contains('on') ? 1 : 0; });
+  var f = [0,1,2].map(function(i){ return document.getElementById('ds-f-'+i)?.classList.contains('on') ? 1 : 0; });
+  try { localStorage.setItem(SAVE_KEY+'_ds', JSON.stringify({s:s,f:f})); } catch(e) {}
+}
+
+function dsLoad() {
+  var data;
+  try { data = JSON.parse(localStorage.getItem(SAVE_KEY+'_ds')); } catch(e) {}
   if (!data) return;
-  document.querySelectorAll('.death-pip.success').forEach((p,i) => { if (data.s?.[i]) p.classList.add('filled'); });
-  document.querySelectorAll('.death-pip.fail').forEach((p,i)    => { if (data.f?.[i]) p.classList.add('filled'); });
+  [0,1,2].forEach(function(i) {
+    if (data.s[i]) document.getElementById('ds-s-'+i)?.classList.add('on');
+    if (data.f[i]) document.getElementById('ds-f-'+i)?.classList.add('on');
+  });
 }
+
 
 load();
 loadNoteDocs();
 loadActions();
-loadDeathSaves();
-setInterval(checkDeathSaves, 1000);
+dsLoad();
 refreshZeroHidden();
 
 // ── TV STATIC ──
