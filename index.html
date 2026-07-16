@@ -1201,10 +1201,7 @@ function save() {
     maxHp:       document.getElementById('maxHp').value,
     level:       document.getElementById('levelVal').value,
     ac:          document.getElementById('acVal').value,
-    str: document.getElementById('strVal').value,
-    mnd: document.getElementById('mndVal').value,
-    sol: document.getElementById('solVal').value,
-    def: document.getElementById('defVal').value,
+    // Stats intentionally not saved — always loaded from JD_DEFAULTS
     initBonus,
     profs,
     items,
@@ -1355,6 +1352,7 @@ function updateStat(stat) {
     el.textContent = mod === 0 ? '' : (mod > 0 ? `+${mod}` : `${mod}`);
   });
   refreshZeroHidden();
+  refreshDefaultActions();
 }
 
 // ══════════════════════════════════════════
@@ -1678,6 +1676,34 @@ function deleteDoc(id) {
 let actionIdCounter = 0;
 
 // Render a read-only default action row
+// Re-render roll display text on default actions when stats change
+function refreshDefaultActions() {
+  document.querySelectorAll('#defaultActionsList .action-row').forEach(row => {
+    const atk = row.dataset.atk;
+    const dmg = row.dataset.dmg;
+    const spans = row.querySelectorAll('.action-roll-text');
+    let i = 0;
+    if (atk) { if (spans[i]) spans[i].textContent = resolveExprDisplay(atk); i++; }
+    if (dmg) { if (spans[i]) spans[i].textContent = resolveExprDisplay(dmg); }
+  });
+}
+
+function resolveExprDisplay(expr) {
+  if (!expr) return '';
+  const statMap = { STR: 'str', MND: 'mnd', SOL: 'sol', DEF: 'def' };
+  let display = expr;
+  Object.entries(statMap).forEach(([kw, stat]) => {
+    if (display.toUpperCase().includes(kw)) {
+      const mod = getStatMod(stat);
+      // Replace "+STR" with the mod (already signed), or bare "STR" with signed mod
+      display = display.replace(new RegExp('\\+?' + kw, 'gi'), mod >= 0 ? `+${mod}` : `${mod}`);
+    }
+  });
+  // Collapse any double signs: ++2 → +2, +-2 → -2
+  display = display.replace(/\+\+/g, '+').replace(/\+-/g, '-').replace(/--/g, '+');
+  return display;
+}
+
 function renderDefaultAction(d) {
   const id  = ++actionIdCounter;
   const row = document.createElement('div');
@@ -1687,6 +1713,11 @@ function renderDefaultAction(d) {
   row.dataset.dmg = d.dmg || '';
   const hasAtk = d.atk && d.atk !== '';
   const hasDmg = d.dmg && d.dmg !== '';
+
+  // Resolve display text live from current stats
+  const atkDisplay = hasAtk ? resolveExprDisplay(d.atk) : '';
+  const dmgDisplay = hasDmg ? resolveExprDisplay(d.dmg) : '';
+
   row.innerHTML = `
     <div class="action-main">
       <div class="action-header">
@@ -1698,12 +1729,12 @@ function renderDefaultAction(d) {
     <div class="action-rolls">
       ${hasAtk ? `<div class="action-roll-wrap">
         <span class="action-roll-label">Atk</span>
-        <span class="action-roll-text">${d.atk}</span>
+        <span class="action-roll-text">${atkDisplay}</span>
         <button class="action-roll-btn" onclick="rollDefaultAction(${id},'atk')">Roll</button>
       </div>` : ''}
       ${hasDmg ? `<div class="action-roll-wrap">
         <span class="action-roll-label">Dmg</span>
-        <span class="action-roll-text">${d.dmg}</span>
+        <span class="action-roll-text">${dmgDisplay}</span>
         <button class="action-roll-btn" onclick="rollDefaultAction(${id},'dmg')">Roll</button>
       </div>` : ''}
     </div>`;
@@ -1717,8 +1748,10 @@ function parseDiceExpr(expr) {
   const statMap = { STR: 'str', MND: 'mnd', SOL: 'sol', DEF: 'def' };
   Object.entries(statMap).forEach(([kw, stat]) => {
     const mod = getStatMod(stat);
-    str = str.replace(new RegExp(kw, 'g'), mod >= 0 ? `+${mod}` : `${mod}`);
+    str = str.replace(new RegExp('\\+?' + kw, 'g'), mod >= 0 ? `+${mod}` : `${mod}`);
   });
+  // Collapse double signs from substitution
+  str = str.replace(/\+\+/g, '+').replace(/\+-/g, '-').replace(/--/g, '+');
   const diceRegex = /(\d*)D(\d+)/g;
   let total = 0, rolls = [], breakdown = [], match, flat = str;
   while ((match = diceRegex.exec(str)) !== null) {
@@ -1830,35 +1863,35 @@ function loadActions() {
 }
 
 function defaultActions() {
-  // Roll actions first, no-roll actions below — edit to change defaults
+  // ── John Doe default actions — uses stat keywords (STR/MND/SOL/DEF) so rolls always reflect current stats ──
   const DEFAULTS = [
     {
         "name": "Unarmed Strike",
-        "atk": "d20+0",
-        "dmg": "1",
+        "atk": "d20+STR",
+        "dmg": "1+STR",
         "flavor": "Sometimes the best weapon is the one at the end of your arm.",
-        "notes": "STR mod +0. Punch, kick, headbutt \u2014 whatever you've got."
+        "notes": "Bludgeoning. Punch, kick, headbutt, whatever you've got."
     },
     {
         "name": "Grapple",
-        "atk": "d20+0",
+        "atk": "d20+STR",
         "dmg": "",
         "flavor": "Close enough to feel their heartbeat. Close enough to stop it.",
-        "notes": "STR mod +0. Contest: STR vs target Athletics or Acrobatics. Success: target is Grappled (speed 0)."
+        "notes": "Contest: STR vs target Athletics or Acrobatics. Success: target is Grappled (speed 0)."
     },
     {
         "name": "Shove",
-        "atk": "d20+0",
+        "atk": "d20+STR",
         "dmg": "",
         "flavor": "Gravity is free damage.",
-        "notes": "STR mod +0. Contest: STR vs target Athletics or Acrobatics. Success: push 5ft away or knock prone."
+        "notes": "Contest: STR vs target Athletics or Acrobatics. Success: push 5ft away or knock prone."
     },
     {
         "name": "Hide",
-        "atk": "d20+0",
+        "atk": "d20+DEF",
         "dmg": "",
         "flavor": "The most dangerous thing in the room is what you can't see.",
-        "notes": "DEF mod +0. DEF (Evasion) vs passive Perception. Success: you become hidden."
+        "notes": "DEF (Evasion) vs passive Perception. Success: you become hidden."
     },
     {
         "name": "Dodge",
