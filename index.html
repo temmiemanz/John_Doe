@@ -742,6 +742,106 @@ body {
 
 
 
+/* ══════════════════════════════════════════
+   ABILITY / ACTIONS TABS
+   ══════════════════════════════════════════ */
+.ab-tab-bar {
+  display: flex; gap: 0; margin-bottom: 14px;
+  border-bottom: 1px solid var(--border2);
+}
+.ab-tab {
+  font-family: var(--font-display); font-size: 11px; font-weight: 700;
+  letter-spacing: 0.15em; text-transform: uppercase;
+  padding: 6px 16px; cursor: pointer; color: var(--muted);
+  border-bottom: 2px solid transparent; margin-bottom: -1px;
+  background: none; border-top: none; border-left: none; border-right: none;
+  transition: all var(--transition);
+}
+.ab-tab:hover { color: var(--text); }
+.ab-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+.ab-pane { display: none; }
+.ab-pane.active { display: block; }
+
+/* ══════════════════════════════════════════
+   ACTIONS
+   ══════════════════════════════════════════ */
+.actions-section-label {
+  font-size: 9px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.14em; color: var(--muted);
+  margin-bottom: 6px;
+}
+.actions-divider { height: 1px; background: var(--border); margin: 10px 0; }
+
+.action-row {
+  display: flex; gap: 10px; align-items: flex-start;
+  padding: 7px 10px; border: 1px solid var(--border);
+  border-radius: var(--radius); margin-bottom: 4px;
+  background: var(--panel2);
+}
+.action-row:last-child { margin-bottom: 0; }
+
+/* Default rows — dimmer, clearly locked */
+.action-row.default-row { opacity: 0.85; }
+
+.action-main { flex: 1; display: flex; flex-direction: column; gap: 2px; min-width: 0; user-select: none; }
+.action-header { display: flex; align-items: center; gap: 6px; }
+.action-name-text {
+  font-size: 13px; font-weight: 600; color: var(--text); flex: 1;
+  pointer-events: none;
+}
+.action-flavor { font-size: 10px; font-style: italic; color: var(--muted); line-height: 1.4; pointer-events: none; }
+.action-notes-text { font-size: 11px; color: var(--dim); line-height: 1.5; pointer-events: none; }
+
+/* Custom rows — editable */
+.action-name {
+  background: none; border: none; color: var(--text);
+  font-family: var(--font-main); font-size: 13px; font-weight: 600;
+  padding: 0; outline: none; flex: 1;
+}
+.action-name::placeholder { color: var(--muted); font-weight: 400; }
+.action-notes {
+  background: none; border: none; color: var(--dim);
+  font-family: var(--font-main); font-size: 11px;
+  padding: 0; outline: none; width: 100%; resize: none;
+  overflow: hidden; line-height: 1.5; height: 16px;
+}
+.action-notes:focus { height: auto; min-height: 32px; }
+.action-notes::placeholder { color: var(--muted); }
+
+.action-rolls { display: flex; flex-direction: column; gap: 4px; flex-shrink: 0; align-items: flex-end; }
+.action-roll-wrap { display: flex; align-items: center; gap: 4px; }
+.action-roll-label {
+  font-size: 8px; font-weight: 700; text-transform: uppercase;
+  letter-spacing: 0.1em; color: var(--muted); min-width: 20px;
+}
+.action-roll-text {
+  font-size: 11px; color: var(--accent); min-width: 52px;
+  text-align: center; pointer-events: none; user-select: none;
+}
+.action-roll-input {
+  background: var(--input); border: 1px solid var(--border);
+  color: var(--text); font-family: var(--font-main); font-size: 11px;
+  width: 62px; text-align: center; padding: 2px 5px;
+  border-radius: var(--radius); outline: none; transition: border-color var(--transition);
+}
+.action-roll-input:focus { border-color: var(--accent); }
+.action-roll-input::placeholder { color: var(--muted); }
+.action-roll-btn {
+  font-size: 8px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+  padding: 2px 8px; border: 1px solid var(--border); background: none;
+  color: var(--muted); border-radius: 99px; cursor: pointer;
+  transition: all var(--transition); white-space: nowrap;
+}
+.action-roll-btn:hover { border-color: var(--accent); color: var(--accent); }
+.action-roll-btn:active { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+.action-rm {
+  background: none; border: none; color: var(--muted);
+  cursor: pointer; font-size: 11px; padding: 0;
+  line-height: 1; transition: color var(--transition); flex-shrink: 0;
+}
+.action-rm:hover { color: var(--red); }
+.action-name-text { font-family: var(--font-main); }
+.action-notes-text { font-family: var(--font-main); }
 </style>
 </head>
 <body>
@@ -929,41 +1029,59 @@ body {
 
   </div><!-- end rolls-initiative-wrap -->
 
-  <!-- ABILITY WIDGET -->
+
+  <!-- ABILITY + ACTIONS COMBINED -->
   <div class="card" id="abilityCard">
-    <div class="card-title">Ability</div>
-    <div id="abilityWidget" class="ability-widget-shell">
-      <div class="jd-ability">
-        <div class="jd-ability-word-row" onclick="focusWordEdit()">
-          <span class="jd-word-label">ACTIVE WORD</span>
-          <div class="jd-word-display">
-            <span class="jd-word-editable" id="jdWord" contenteditable="true" spellcheck="false" data-placeholder="—"></span>
-            <span class="jd-word-cursor" id="jdWordCursor">_</span>
+    <div class="ab-tab-bar">
+      <button class="ab-tab active" onclick="switchAbTab('ability')">Ability</button>
+      <button class="ab-tab"        onclick="switchAbTab('actions')">Actions</button>
+    </div>
+    <div class="ab-pane active" id="ab-ability">
+      <div id="abilityWidget" class="ability-widget-shell">
+        <div class="jd-ability">
+          <div class="jd-ability-word-row" onclick="focusWordEdit()">
+            <span class="jd-word-label">ACTIVE WORD</span>
+            <div class="jd-word-display">
+              <span class="jd-word-editable" id="jdWord" contenteditable="true" spellcheck="false" data-placeholder="—"></span>
+              <span class="jd-word-cursor" id="jdWordCursor">_</span>
+            </div>
+            <button class="jd-clear-inline" onclick="event.stopPropagation();clearJdWord()" title="Clear word">✕</button>
           </div>
-          <button class="jd-clear-inline" onclick="event.stopPropagation();clearJdWord()" title="Clear word">✕</button>
+
+          <div class="jd-ability-section">
+            <div class="jd-section-title">ABILITY — PERSPECTIVE</div>
+            <p class="jd-flavor">John Doe speaks one word. It requires <em>one living perceiver</em> and <em>one target</em> — living or not. The perceiver's reality shifts to match the word as <em>they personally</em> interpret it, but only as it applies to the target. The sun exists, the rock floats — the perceiver alone experiences this. Everyone else sees what is actually happening.</p>
+          </div>
+
+          <div class="jd-ability-section">
+            <div class="jd-section-title">LIMITS</div>
+            <ul class="jd-limits">
+              <li><span class="jd-limit-head">Two required</span> — one <em>living perceiver</em> + one target (living or not). The word is placed on the target, seen only by the perceiver.</li>
+              <li><span class="jd-limit-head">One perceiver only</span> — if both are living, only one can be the perceiver. You cannot make two people affect each other simultaneously.</li>
+              <li><span class="jd-limit-head">One at a time</span> — one word, one pair, one effect. A new word replaces the last entirely.</li>
+              <li><span class="jd-limit-head">Scope</span> — the word only affects something the perceiver can directly perceive or interact with in that moment. The sun, the earth, the sky are outside scope entirely.</li>
+              <li><span class="jd-limit-head">Interpretation</span> — what the word means <em>to the perceiver</em> is what happens, not what John Doe intends.</li>
+              <li><span class="jd-limit-head">Roll dependent</span> — outcome is as precise or as chaotic as the roll allows.</li>
+            </ul>
+          </div>
         </div>
-
-        <div class="jd-ability-section">
-          <div class="jd-section-title">ABILITY — PERSPECTIVE</div>
-          <p class="jd-flavor">John Doe speaks one word. It requires <em>one living perceiver</em> and <em>one target</em> — living or not. The perceiver's reality shifts to match the word as <em>they personally</em> interpret it, but only as it applies to the target. The sun exists, the rock floats — the perceiver alone experiences this. Everyone else sees what is actually happening.</p>
-        </div>
-
-        <div class="jd-ability-section">
-          <div class="jd-section-title">LIMITS</div>
-          <ul class="jd-limits">
-            <li><span class="jd-limit-head">Two required</span> — one <em>living perceiver</em> + one target (living or not). The word is placed on the target, seen only by the perceiver.</li>
-            <li><span class="jd-limit-head">One perceiver only</span> — if both are living, only one can be the perceiver. You cannot make two people affect each other simultaneously.</li>
-            <li><span class="jd-limit-head">One at a time</span> — one word, one pair, one effect. A new word replaces the last entirely.</li>
-            <li><span class="jd-limit-head">Scope</span> — the word only affects something the perceiver can directly perceive or interact with in that moment. The sun, the earth, the sky are outside scope entirely.</li>
-            <li><span class="jd-limit-head">Interpretation</span> — what the word means <em>to the perceiver</em> is what happens, not what John Doe intends.</li>
-            <li><span class="jd-limit-head">Roll dependent</span> — outcome is as precise or as chaotic as the roll allows.</li>
-          </ul>
-        </div>
-
-
       </div>
     </div>
+    <div class="ab-pane" id="ab-actions">
+
+      <!-- DEFAULT ACTIONS — hardcoded, never saved, never editable -->
+      <div class="actions-section-label">Standard Actions</div>
+      <div id="defaultActionsList"></div>
+
+      <div class="actions-divider"></div>
+
+      <!-- CUSTOM ACTIONS — player-added, editable, saved -->
+      <div class="actions-section-label">Custom Actions</div>
+      <div id="actionsList"></div>
+      <button class="add-btn" onclick="addCustomAction()">+ Add Action</button>
+    </div>
   </div>
+
 
   <!-- INVENTORY + CONDITIONS -->
   <div class="card">
@@ -1022,6 +1140,17 @@ body {
 
 <script>
 const SAVE_KEY = 'john_doe_sheet_v1';
+
+// ══════════════════════════════════════════
+// ABILITY / ACTIONS TABS
+// ══════════════════════════════════════════
+function switchAbTab(tab) {
+  document.querySelectorAll('.ab-tab').forEach((b, i) => {
+    b.classList.toggle('active', (i === 0 && tab === 'ability') || (i === 1 && tab === 'actions'));
+  });
+  document.getElementById('ab-ability').classList.toggle('active', tab === 'ability');
+  document.getElementById('ab-actions').classList.toggle('active', tab === 'actions');
+}
 
 // ══════════════════════════════════════════
 // EDIT MODE
@@ -1541,8 +1670,239 @@ function deleteDoc(id) {
 // ══════════════════════════════════════════
 // INIT
 // ══════════════════════════════════════════
+
+
+// ══════════════════════════════════════════
+// ACTIONS
+// ══════════════════════════════════════════
+let actionIdCounter = 0;
+
+// Render a read-only default action row
+function renderDefaultAction(d) {
+  const id  = ++actionIdCounter;
+  const row = document.createElement('div');
+  row.className  = 'action-row default-row';
+  row.dataset.id = id;
+  row.dataset.atk = d.atk || '';
+  row.dataset.dmg = d.dmg || '';
+  const hasAtk = d.atk && d.atk !== '';
+  const hasDmg = d.dmg && d.dmg !== '';
+  row.innerHTML = `
+    <div class="action-main">
+      <div class="action-header">
+        <span class="action-name-text">${d.name}</span>
+      </div>
+      <span class="action-flavor">${d.flavor}</span>
+      <span class="action-notes-text">${d.notes}</span>
+    </div>
+    <div class="action-rolls">
+      ${hasAtk ? `<div class="action-roll-wrap">
+        <span class="action-roll-label">Atk</span>
+        <span class="action-roll-text">${d.atk}</span>
+        <button class="action-roll-btn" onclick="rollDefaultAction(${id},'atk')">Roll</button>
+      </div>` : ''}
+      ${hasDmg ? `<div class="action-roll-wrap">
+        <span class="action-roll-label">Dmg</span>
+        <span class="action-roll-text">${d.dmg}</span>
+        <button class="action-roll-btn" onclick="rollDefaultAction(${id},'dmg')">Roll</button>
+      </div>` : ''}
+    </div>`;
+  document.getElementById('defaultActionsList').appendChild(row);
+}
+
+// Parse a dice expression: "2d6+3", "d20+STR", "d20+0" etc.
+// STR/MND/SOL/DEF keywords resolve to current stat mods.
+function parseDiceExpr(expr) {
+  let str = expr.trim().toUpperCase();
+  const statMap = { STR: 'str', MND: 'mnd', SOL: 'sol', DEF: 'def' };
+  Object.entries(statMap).forEach(([kw, stat]) => {
+    const mod = getStatMod(stat);
+    str = str.replace(new RegExp(kw, 'g'), mod >= 0 ? `+${mod}` : `${mod}`);
+  });
+  const diceRegex = /(\d*)D(\d+)/g;
+  let total = 0, rolls = [], breakdown = [], match, flat = str;
+  while ((match = diceRegex.exec(str)) !== null) {
+    const count = parseInt(match[1]) || 1;
+    const sides = parseInt(match[2]);
+    const these = [];
+    for (let i = 0; i < count; i++) these.push(fairDie(sides));
+    const sum = these.reduce((a,b) => a+b, 0);
+    total += sum; rolls.push(...these);
+    breakdown.push(`${count}d${sides}[${these.join(',')}]`);
+    flat = flat.replace(match[0], '');
+  }
+  flat = flat.replace(/\s/g, '');
+  if (flat && flat !== '+' && flat !== '-') {
+    try { total += Function('"use strict";return (' + flat + ')')(); } catch(e) {}
+  }
+  return { total, breakdown: breakdown.join(' + '), firstRoll: rolls[0] ?? null };
+}
+
+function rollDefaultAction(id, type) {
+  const row  = document.querySelector(`.action-row[data-id='${id}']`);
+  if (!row) return;
+  const name = row.querySelector('.action-name-text').textContent;
+  const expr = type === 'atk' ? row.dataset.atk : row.dataset.dmg;
+  if (!expr) return;
+  const { total, firstRoll } = parseDiceExpr(expr);
+  showToast(firstRoll ?? total, total, `${name} — ${type === 'atk' ? 'Attack' : 'Damage'}`);
+}
+
+// Render an editable custom action row
+function addCustomAction(data = {}) {
+  const id  = ++actionIdCounter;
+  const row = document.createElement('div');
+  row.className  = 'action-row';
+  row.dataset.id = id;
+  row.innerHTML = `
+    <div class="action-main">
+      <div class="action-header">
+        <input class="action-name" type="text" placeholder="Action name" value="${data.name||''}" oninput="saveCustomActions()">
+        <button class="action-rm" onclick="removeCustomAction(${id})">✕</button>
+      </div>
+      <textarea class="action-notes" placeholder="Notes..." oninput="saveCustomActions();autoResize(this)">${data.notes||''}</textarea>
+    </div>
+    <div class="action-rolls">
+      <div class="action-roll-wrap">
+        <span class="action-roll-label">Atk</span>
+        <input class="action-roll-input" type="text" placeholder="d20+STR" value="${data.atk||''}" oninput="saveCustomActions()">
+        <button class="action-roll-btn" onclick="rollCustomAction(${id},'atk')">Roll</button>
+      </div>
+      <div class="action-roll-wrap">
+        <span class="action-roll-label">Dmg</span>
+        <input class="action-roll-input" type="text" placeholder="1d6+2" value="${data.dmg||''}" oninput="saveCustomActions()">
+        <button class="action-roll-btn" onclick="rollCustomAction(${id},'dmg')">Roll</button>
+      </div>
+    </div>`;
+  document.getElementById('actionsList').appendChild(row);
+}
+
+function removeCustomAction(id) {
+  const el = document.querySelector(`.action-row[data-id='${id}']`);
+  if (el) { el.remove(); saveCustomActions(); }
+}
+
+function rollCustomAction(id, type) {
+  const row  = document.querySelector(`.action-row[data-id='${id}']`);
+  if (!row) return;
+  const name   = row.querySelector('.action-name').value || 'Action';
+  const inputs = row.querySelectorAll('.action-roll-input');
+  const expr   = type === 'atk' ? inputs[0].value : inputs[1].value;
+  if (!expr.trim()) return;
+  const { total, firstRoll } = parseDiceExpr(expr);
+  showToast(firstRoll ?? total, total, `${name} — ${type === 'atk' ? 'Attack' : 'Damage'}`);
+}
+
+// Keep old rollAction alias so nothing breaks
+function rollAction(id, type) { rollCustomAction(id, type); }
+
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = el.scrollHeight + 'px';
+}
+
+function saveCustomActions() {
+  const rows = document.querySelectorAll('#actionsList .action-row');
+  const data = [];
+  rows.forEach(row => {
+    const inputs = row.querySelectorAll('.action-roll-input');
+    data.push({
+      name:  row.querySelector('.action-name')?.value || '',
+      notes: row.querySelector('.action-notes')?.value || '',
+      atk:   inputs[0]?.value || '',
+      dmg:   inputs[1]?.value || '',
+    });
+  });
+  try { localStorage.setItem(SAVE_KEY + '_custom_actions', JSON.stringify(data)); } catch(e) {}
+}
+
+// Keep old saveActions alias
+function saveActions() { saveCustomActions(); }
+
+function loadActions() {
+  // Always render hardcoded defaults fresh — never from storage
+  // (defaults defined in defaultActions())
+  defaultActions();
+  // Load custom actions from storage
+  let data;
+  try { data = JSON.parse(localStorage.getItem(SAVE_KEY + '_custom_actions')); } catch(e) {}
+  if (data && data.length) data.forEach(d => addCustomAction(d));
+}
+
+function defaultActions() {
+  // Roll actions first, no-roll actions below — edit to change defaults
+  const DEFAULTS = [
+    {
+        "name": "Unarmed Strike",
+        "atk": "d20+0",
+        "dmg": "1",
+        "flavor": "Sometimes the best weapon is the one at the end of your arm.",
+        "notes": "STR mod +0. Punch, kick, headbutt \u2014 whatever you've got."
+    },
+    {
+        "name": "Grapple",
+        "atk": "d20+0",
+        "dmg": "",
+        "flavor": "Close enough to feel their heartbeat. Close enough to stop it.",
+        "notes": "STR mod +0. Contest: STR vs target Athletics or Acrobatics. Success: target is Grappled (speed 0)."
+    },
+    {
+        "name": "Shove",
+        "atk": "d20+0",
+        "dmg": "",
+        "flavor": "Gravity is free damage.",
+        "notes": "STR mod +0. Contest: STR vs target Athletics or Acrobatics. Success: push 5ft away or knock prone."
+    },
+    {
+        "name": "Hide",
+        "atk": "d20+0",
+        "dmg": "",
+        "flavor": "The most dangerous thing in the room is what you can't see.",
+        "notes": "DEF mod +0. DEF (Evasion) vs passive Perception. Success: you become hidden."
+    },
+    {
+        "name": "Dodge",
+        "atk": "",
+        "dmg": "",
+        "flavor": "The best hit is the one that doesn't land.",
+        "notes": "Until next turn: attacks against you have disadvantage, DEX saves have advantage."
+    },
+    {
+        "name": "Dash",
+        "atk": "",
+        "dmg": "",
+        "flavor": "Sometimes valor looks a lot like running.",
+        "notes": "Double your movement speed this turn."
+    },
+    {
+        "name": "Disengage",
+        "atk": "",
+        "dmg": "",
+        "flavor": "A clean exit is a skill in itself.",
+        "notes": "Your movement doesn't provoke opportunity attacks this turn."
+    },
+    {
+        "name": "Help",
+        "atk": "",
+        "dmg": "",
+        "flavor": "One set of hands is never enough.",
+        "notes": "Give an ally advantage on their next ability check or attack roll against a target you can reach."
+    }
+];
+  DEFAULTS.forEach(d => renderDefaultAction(d));
+}
+
+function loadActions() {
+  let data;
+  try { data = JSON.parse(localStorage.getItem(SAVE_KEY + '_actions')); } catch(e) {}
+  // If saved count is less than defaults, wipe and reload defaults (catches stale saves)
+  if (!data || data.length < 8 || !data[0]?.isDefault) { defaultActions(); return; }
+  data.forEach(d => addAction(d));
+}
+
 load();
 loadNoteDocs();
+loadActions();
 refreshZeroHidden();
 
 // ── TV STATIC ──
