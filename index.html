@@ -1608,7 +1608,6 @@ function clampHp() {
   const cur = document.getElementById('currentHp');
   const max = parseInt(document.getElementById('maxHp').value);
   if (!isNaN(max) && parseInt(cur.value) > max) cur.value = max;
-  checkDeathSaves();
 }
 
 // ══════════════════════════════════════════
@@ -1998,11 +1997,13 @@ function loadActions() {
 // DEATH SAVES
 // ══════════════════════════════════════════
 function checkDeathSaves() {
-  const raw = document.getElementById('currentHp').value;
+  const el  = document.getElementById('currentHp');
   const box = document.getElementById('deathSaves');
-  if (!box) return;
-  const hp = raw === '' ? null : parseInt(raw);
-  box.classList.toggle('visible', hp === 0);
+  if (!box || !el) return;
+  const raw = el.value.trim();
+  // Show death saves only when HP is explicitly the number 0
+  const show = raw !== '' && raw !== '—' && parseInt(raw) === 0;
+  box.classList.toggle('visible', show);
 }
 
 function toggleDeathPip(pip) {
@@ -2064,7 +2065,7 @@ load();
 loadNoteDocs();
 loadActions();
 loadDeathSaves();
-checkDeathSaves();
+setInterval(checkDeathSaves, 1000);
 refreshZeroHidden();
 
 // ── TV STATIC ──
