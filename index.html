@@ -937,6 +937,30 @@ body {
     </div>
   </div>
 
+
+  <!-- DEATH SAVES -->
+  <div id="deathSaves">
+    <div class="ds-title">⚠ Death Saves</div>
+    <div class="ds-row">
+      <span class="ds-label">Successes</span>
+      <div class="ds-pips">
+        <div class="ds-pip s" id="ds-s-0" onclick="dsPip(this)"></div>
+        <div class="ds-pip s" id="ds-s-1" onclick="dsPip(this)"></div>
+        <div class="ds-pip s" id="ds-s-2" onclick="dsPip(this)"></div>
+      </div>
+    </div>
+    <div class="ds-row">
+      <span class="ds-label">Failures</span>
+      <div class="ds-pips">
+        <div class="ds-pip f" id="ds-f-0" onclick="dsPip(this)"></div>
+        <div class="ds-pip f" id="ds-f-1" onclick="dsPip(this)"></div>
+        <div class="ds-pip f" id="ds-f-2" onclick="dsPip(this)"></div>
+      </div>
+      <button class="ds-roll" onclick="dsRoll()">Roll Save</button>
+      <button class="ds-roll" onclick="dsClear()" style="border-color:var(--muted);color:var(--muted);margin-left:6px;">Reset</button>
+    </div>
+  </div>
+
   <!-- STATS + SKILLS + SIDE COLUMN -->
   <div class="rolls-initiative-wrap">
 
@@ -1133,29 +1157,6 @@ body {
     </div>
   </div>
 
-
-
-  <!-- DEATH SAVES -->
-  <div id="deathSaves">
-    <div class="ds-title">⚠ Death Saves</div>
-    <div class="ds-row">
-      <span class="ds-label">Successes</span>
-      <div class="ds-pips">
-        <div class="ds-pip s" id="ds-s-0" onclick="dsPip(this)"></div>
-        <div class="ds-pip s" id="ds-s-1" onclick="dsPip(this)"></div>
-        <div class="ds-pip s" id="ds-s-2" onclick="dsPip(this)"></div>
-      </div>
-    </div>
-    <div class="ds-row">
-      <span class="ds-label">Failures</span>
-      <div class="ds-pips">
-        <div class="ds-pip f" id="ds-f-0" onclick="dsPip(this)"></div>
-        <div class="ds-pip f" id="ds-f-1" onclick="dsPip(this)"></div>
-        <div class="ds-pip f" id="ds-f-2" onclick="dsPip(this)"></div>
-      </div>
-      <button class="ds-roll" onclick="dsRoll()">Roll Save</button>
-    </div>
-  </div>
 
   <!-- LORE -->
   <div class="card lore-card">
