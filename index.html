@@ -1608,6 +1608,7 @@ function clampHp() {
   const cur = document.getElementById('currentHp');
   const max = parseInt(document.getElementById('maxHp').value);
   if (!isNaN(max) && parseInt(cur.value) > max) cur.value = max;
+  checkDeathSaves();
 }
 
 // ══════════════════════════════════════════
@@ -1997,9 +1998,10 @@ function loadActions() {
 // DEATH SAVES
 // ══════════════════════════════════════════
 function checkDeathSaves() {
-  const hp  = parseInt(document.getElementById('currentHp').value) || 0;
+  const raw = document.getElementById('currentHp').value;
   const box = document.getElementById('deathSaves');
   if (!box) return;
+  const hp = raw === '' ? null : parseInt(raw);
   box.classList.toggle('visible', hp === 0);
 }
 
